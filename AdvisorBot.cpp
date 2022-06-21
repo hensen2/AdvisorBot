@@ -9,17 +9,18 @@ AdvisorBot::AdvisorBot() = default;
 
 void AdvisorBot::init()
 {
-    std::string input;
-    commandPrompt();
+    std::vector<std::string> input;
+    currentTime = orderBook.getLaterTime();
+    welcomePrompt();
 
     while (true)
     {
         input = getUserOption();
-        processUserOptions(input);
+        handleUserOptions(input);
     }
 }
 
-void AdvisorBot::commandPrompt()
+void AdvisorBot::welcomePrompt()
 {
     std::cout << "===============================================" << std::endl;
     std::cout << "  $$$$$***** Welcome to AdvisorBot *****$$$$$  " << std::endl;
@@ -51,7 +52,7 @@ void AdvisorBot::commandPrompt()
     std::cout << " min <product> <order>                   "
               << "find minimum <order> for <product> in current time step" << std::endl;
 
-    std::cout << " max                                     "
+    std::cout << " max <product> <order>                   "
               << "find maximum <order> for <product> in current time step" << std::endl;
 
     std::cout << " avg <product> <order> <timesteps>       "
@@ -87,11 +88,20 @@ void AdvisorBot::commandPrompt()
               << std::endl;
 }
 
-std::string AdvisorBot::getUserOption()
+std::vector<std::string> AdvisorBot::getUserOption()
 {
     // User input
     std::string userOption;
     std::string line;
+
+    // Commands vectro to be returned
+    std::vector<std::string> commands;
+
+    // User output
+    std::string cmd;
+    std::string arg1;
+    std::string arg2;
+    std::string arg3;
 
     // Main menu prompt
     std::cout << "advisorbot$ "
@@ -103,23 +113,70 @@ std::string AdvisorBot::getUserOption()
     {
         userOption = line;
         std::cout << "You entered: " << userOption << std::endl;
-        std::vector<std::string> commands = StringParser::tokeniseCommands(userOption, ' ');
-        for (std::string command : commands)
+        commands = StringParser::tokeniseCommands(userOption, ' ');
+        for (std::string command : possibleCmds)
         {
-            std::cout << "Array: " << command << std::endl;
+            if (commands[0] == command)
+            {
+                std::cout << command << std::endl;
+            }
         }
     }
     catch (const std::exception &e)
     {
         //
     }
-    return userOption;
+    return commands;
 }
 
-void AdvisorBot::processUserOptions(std::string userOption)
+void AdvisorBot::handleUserOptions(std::vector<std::string> userOption)
 {
-    if (userOption == "help")
+    if (userOption[0] == "help")
     {
-        return;
+        if (userOption.size() > 1)
+        {
+            for (std::string command : possibleCmds)
+            {
+                if (userOption[1] == command)
+                {
+                    Command::helpCmd(command);
+                    return;
+                }
+            }
+        }
+        Command::help();
+    }
+    if (userOption[0] == "prod" && userOption.size() == 1)
+    {
+        Command::prod(orderBook);
+    }
+    if (userOption[0] == "min" && userOption.size() == 3)
+    {
+        Command::min(orderBook, userOption[1], userOption[2], currentTime);
+    }
+    if (userOption[0] == "max" && userOption.size() == 3)
+    {
+        Command::max(orderBook, userOption[1], userOption[2], currentTime);
+    }
+    if (userOption[0] == "avg" && userOption.size() == 4)
+    {
+        Command::avg(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
+    }
+    if (userOption[0] == "predict" && userOption.size() == 4)
+    {
+        Command::predict(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
+    }
+    if (userOption[0] == "time" && userOption.size() == 1)
+    {
+        Command::time(currentTime);
+    }
+    if (userOption[0] == "step" && userOption.size() == 1)
+    {
+        currentTime = Command::step(orderBook, currentTime);
+    }
+    if (userOption[0] == "import" && userOption.size() == 2)
+    {
+        orderBook = Command::import(userOption[1]);
+        currentTime = orderBook.getEarliestTime();
     }
 }

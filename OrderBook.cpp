@@ -31,9 +31,30 @@ std::vector<std::string> OrderBook::getKnownProducts()
     return products;
 }
 
+/** return vector of all known timestamps in the dataset */
+std::vector<std::string> OrderBook::getKnownTimestamps()
+{
+    std::vector<std::string> timestamps;
+
+    std::map<std::string, bool> timeMap;
+
+    for (OrderBookEntry &e : orders)
+    {
+        timeMap[e.timestamp] = true;
+    }
+
+    // flatten map to a vector of strings
+    for (auto const &e : timeMap)
+    {
+        timestamps.push_back(e.first);
+    }
+
+    return timestamps;
+}
+
 /** return vector of Orders according to the sent filters */
-std::vector<OrderBookEntry> OrderBook::getOrders(OrderBookType type,
-                                                 std::string product,
+std::vector<OrderBookEntry> OrderBook::getOrders(std::string product,
+                                                 OrderBookType type,
                                                  std::string timestamp)
 {
     std::vector<OrderBookEntry> orders_sub;
@@ -43,6 +64,22 @@ std::vector<OrderBookEntry> OrderBook::getOrders(OrderBookType type,
         if (e.orderType == type &&
             e.product == product &&
             e.timestamp == timestamp)
+        {
+            orders_sub.push_back(e);
+        }
+    }
+    return orders_sub;
+}
+
+std::vector<OrderBookEntry> OrderBook::getOrdersTP(std::string product,
+                                                   OrderBookType type)
+{
+    std::vector<OrderBookEntry> orders_sub;
+
+    for (OrderBookEntry &e : orders)
+    {
+        if (e.orderType == type &&
+            e.product == product)
         {
             orders_sub.push_back(e);
         }
@@ -81,6 +118,15 @@ std::string OrderBook::getEarliestTime()
     return orders[0].timestamp;
 }
 
+std::string OrderBook::getLaterTime()
+{
+    // about 476 per timestep
+    // each timestep is 5 sec, so 30 min is 360 timesteps
+    // want the timestep 30 minutes later than the earliest timestep
+    int thirtyMin = 360 * 476; // 171,360
+    return orders[thirtyMin].timestamp;
+}
+
 std::string OrderBook::getNextTime(std::string timestamp)
 {
     std::string next_timestamp = "";
@@ -108,12 +154,12 @@ void OrderBook::insertOrder(OrderBookEntry &order)
 std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product, std::string timestamp)
 {
     // orderbook.asks
-    std::vector<OrderBookEntry> asks = getOrders(OrderBookType::ask,
-                                                 product,
+    std::vector<OrderBookEntry> asks = getOrders(product,
+                                                 OrderBookType::ask,
                                                  timestamp);
     // orderbook.bids
-    std::vector<OrderBookEntry> bids = getOrders(OrderBookType::bid,
-                                                 product,
+    std::vector<OrderBookEntry> bids = getOrders(product,
+                                                 OrderBookType::bid,
                                                  timestamp);
 
     // sales vector initialized

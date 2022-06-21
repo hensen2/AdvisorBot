@@ -12,13 +12,20 @@ public:
     OrderBook(std::string filename);
     /** return vector of all known products in the dataset */
     std::vector<std::string> getKnownProducts();
+    /** return vector of all known timestamps in the dataset */
+    std::vector<std::string> getKnownTimestamps();
     /** return vector of Orders according to the sent filters */
-    std::vector<OrderBookEntry> getOrders(OrderBookType type,
-                                          std::string product,
+    std::vector<OrderBookEntry> getOrders(std::string product,
+                                          OrderBookType type,
                                           std::string timestamp);
+
+    std::vector<OrderBookEntry> getOrdersTP(std::string product,
+                                            OrderBookType type);
 
     /** returns the earliest time in the orderbook */
     std::string getEarliestTime();
+    /** returns the earliest time in the orderbook */
+    std::string getLaterTime();
     /** returns the next time after the sent time in the orderbook
      * If there is no next timestamp, wraps around to the start
      */

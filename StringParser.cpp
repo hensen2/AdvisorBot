@@ -6,24 +6,29 @@ StringParser::StringParser() = default;
 std::vector<std::string> StringParser::tokeniseCommands(std::string userOption, char separator)
 {
     std::vector<std::string> commands;
-    size_t start = 0;
-    size_t end = userOption.find(separator);
+    short start = userOption.find_first_not_of(separator, 0);
+    short end = userOption.find_first_of(separator, start);
 
     if (end == std::string::npos)
     {
-        commands.push_back(userOption);
+        commands.push_back(userOption.substr(start, userOption.length()));
         return commands;
     }
 
-    while (end != std::string::npos)
+    while (end != std::string::npos) // end <= userOption.length()
     {
-        commands.push_back(userOption.substr(start, end - start));
-        start = end + 1;
-        if (userOption.find(separator, start) == std::string::npos)
+        if (userOption.find_first_not_of(separator, end) == std::string::npos)
         {
-            commands.push_back(userOption.substr(start, userOption.size() - 1));
+            std::cout << "No trailing spaces allowed" << std::endl;
+            return commands;
         }
-        end = userOption.find(separator, start);
+        commands.push_back(userOption.substr(start, end - start));
+        start = userOption.find_first_not_of(separator, end);
+        end = userOption.find_first_of(separator, start);
+        if (end == std::string::npos)
+        {
+            commands.push_back(userOption.substr(start, userOption.length()));
+        }
     }
     return commands;
 }
