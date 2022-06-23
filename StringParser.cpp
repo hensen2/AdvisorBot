@@ -1,33 +1,47 @@
 #include "StringParser.h"
 #include <iostream>
 
+// StringParser::StringParser(std::string userOption, char userSeparator)
+// {
+//     separator = userSeparator;
+//     commands = StringParser::tokeniseCmds(userOption, separator);
+// }
 StringParser::StringParser() = default;
 
-std::vector<std::string> StringParser::tokeniseCommands(std::string userOption, char separator)
+std::string StringParser::trimInput(std::string userOption, char separator)
 {
-    std::vector<std::string> commands;
+    std::string trimmedOption{};
     short start = userOption.find_first_not_of(separator, 0);
-    short end = userOption.find_first_of(separator, start);
+    short end = userOption.find_last_not_of(' ');
+    if (start != std::string::npos && end != std::string::npos)
+    {
+        trimmedOption = userOption.substr(start, end - start + 1);
+    }
+    return trimmedOption;
+}
+
+std::vector<std::string> StringParser::tokeniseCmds(std::string userOption, char separator)
+{
+    std::string trimStr = trimInput(userOption, separator);
+
+    std::vector<std::string> commands;
+    short start = 0;
+    short end = trimStr.find_first_of(separator, start);
 
     if (end == std::string::npos)
     {
-        commands.push_back(userOption.substr(start, userOption.length()));
+        commands.push_back(trimStr.substr(0, trimStr.length()));
         return commands;
     }
 
-    while (end != std::string::npos) // end <= userOption.length()
+    while (end != std::string::npos)
     {
-        if (userOption.find_first_not_of(separator, end) == std::string::npos)
-        {
-            std::cout << "No trailing spaces allowed" << std::endl;
-            return commands;
-        }
-        commands.push_back(userOption.substr(start, end - start));
-        start = userOption.find_first_not_of(separator, end);
-        end = userOption.find_first_of(separator, start);
+        commands.push_back(trimStr.substr(start, end - start));
+        start = trimStr.find_first_not_of(separator, end);
+        end = trimStr.find_first_of(separator, start);
         if (end == std::string::npos)
         {
-            commands.push_back(userOption.substr(start, userOption.length()));
+            commands.push_back(trimStr.substr(start, trimStr.length()));
         }
     }
     return commands;

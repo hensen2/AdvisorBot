@@ -58,7 +58,7 @@ void AdvisorBot::welcomePrompt()
     std::cout << " avg <product> <order> <timesteps>       "
               << "compute average <order> for the sent <product> over the sent number of <timesteps>" << std::endl;
 
-    std::cout << " predict <max/min> <product> <order>     "
+    std::cout << " predict <max/min> <order> <product>     "
               << "predict <max> or <min> and <order> for the sent <product> for the next time step" << std::endl;
 
     std::cout << " time                                    "
@@ -94,14 +94,8 @@ std::vector<std::string> AdvisorBot::getUserOption()
     std::string userOption;
     std::string line;
 
-    // Commands vectro to be returned
+    // Commands vector to be returned
     std::vector<std::string> commands;
-
-    // User output
-    std::string cmd;
-    std::string arg1;
-    std::string arg2;
-    std::string arg3;
 
     // Main menu prompt
     std::cout << "advisorbot$ "
@@ -113,13 +107,13 @@ std::vector<std::string> AdvisorBot::getUserOption()
     {
         userOption = line;
         std::cout << "You entered: " << userOption << std::endl;
-        commands = StringParser::tokeniseCommands(userOption, ' ');
-        for (std::string command : possibleCmds)
+        std::vector<std::string> commands = StringParser::tokeniseCmds(userOption, ' ');
+        for (std::string &cmd : possibleCmds)
         {
-            if (commands[0] == command)
-            {
-                std::cout << command << std::endl;
-            }
+            // if (cmd == commands[0])
+            // {
+            // }
+            // throw error
         }
     }
     catch (const std::exception &e)
@@ -131,52 +125,69 @@ std::vector<std::string> AdvisorBot::getUserOption()
 
 void AdvisorBot::handleUserOptions(std::vector<std::string> userOption)
 {
-    if (userOption[0] == "help")
+    std::string cmd{};
+    std::string arg1{};
+    OrderBookType arg2{};
+    std::string order{};
+    std::string arg3{};
+
+    for (std::string &str : userOption)
     {
-        if (userOption.size() > 1)
-        {
-            for (std::string command : possibleCmds)
-            {
-                if (userOption[1] == command)
-                {
-                    Command::helpCmd(command);
-                    return;
-                }
-            }
-        }
-        Command::help();
+        cmd = userOption[0];
+        arg1 = userOption[1];
+        arg2 = OrderBookEntry::stringToOrderBookType(userOption[2]);
+        order = userOption[2];
+        arg3 = userOption[3];
     }
-    if (userOption[0] == "prod" && userOption.size() == 1)
-    {
-        Command::prod(orderBook);
-    }
-    if (userOption[0] == "min" && userOption.size() == 3)
-    {
-        Command::min(orderBook, userOption[1], userOption[2], currentTime);
-    }
-    if (userOption[0] == "max" && userOption.size() == 3)
-    {
-        Command::max(orderBook, userOption[1], userOption[2], currentTime);
-    }
-    if (userOption[0] == "avg" && userOption.size() == 4)
-    {
-        Command::avg(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
-    }
-    if (userOption[0] == "predict" && userOption.size() == 4)
-    {
-        Command::predict(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
-    }
-    if (userOption[0] == "time" && userOption.size() == 1)
-    {
-        Command::time(currentTime);
-    }
-    if (userOption[0] == "step" && userOption.size() == 1)
-    {
-        currentTime = Command::step(orderBook, currentTime);
-    }
-    if (userOption[0] == "import" && userOption.size() == 2)
-    {
-        orderBook = Command::import(userOption[1]);
-        currentTime = orderBook.getEarliestTime();
-    }
+
+    Command command(cmd, arg1, arg2, order, arg3);
+
+    // if (userOption[0] == "help")
+    // {
+    //     if (userOption.size() > 1)
+    //     {
+    //         for (std::string command : possibleCmds)
+    //         {
+    //             if (userOption[1] == command)
+    //             {
+    //                 Command::helpCmd(command);
+    //                 return;
+    //             }
+    //         }
+    //     }
+    //     Command::help();
+    // }
+    // if (userOption[0] == "prod" && userOption.size() == 1)
+    // {
+    //     Command::prod(orderBook);
+    // }
+    // if (userOption[0] == "min" && userOption.size() == 3)
+    // {
+    //     Command::min(orderBook, userOption[1], userOption[2], currentTime);
+    // }
+    // if (userOption[0] == "max" && userOption.size() == 3)
+    // {
+    //     Command::max(orderBook, userOption[1], userOption[2], currentTime);
+    // }
+    // if (userOption[0] == "avg" && userOption.size() == 4)
+    // {
+    //     Command::avg(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
+    // }
+    // if (userOption[0] == "predict" && userOption.size() == 4)
+    // {
+    //     Command::predict(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
+    // }
+    // if (userOption[0] == "time" && userOption.size() == 1)
+    // {
+    //     Command::time(currentTime);
+    // }
+    // if (userOption[0] == "step" && userOption.size() == 1)
+    // {
+    //     currentTime = Command::step(orderBook, currentTime);
+    // }
+    // if (userOption[0] == "import" && userOption.size() == 2)
+    // {
+    //     orderBook = Command::import(userOption[1]);
+    //     currentTime = orderBook.getEarliestTime();
+    // }
 }

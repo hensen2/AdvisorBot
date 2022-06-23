@@ -1,72 +1,24 @@
 #include "Command.h"
+#include "OrderBookEntry.h"
 #include "AdvisorBot.h"
 #include "OrderBook.h"
 #include <iostream>
 
-Command::Command() = default;
-
-void Command::cmdCaller(std::vector<std::string> commands)
+Command::Command(std::string _cmd)
+    : cmd(_cmd)
 {
-
-    // help
-    if (commands[0] == "help")
-    {
-        help();
-    }
-
-    // // help <cmd>
-    // if (commands[0] == "help")
-    // {
-    //     helpCmd();
-    // }
-
-    // // prod
-    // if (commands[0] == "prod")
-    // {
-    //     prod();
-    // }
-
-    // // min
-    // if (commands[0] == "min")
-    // {
-    //     min();
-    // }
-
-    // // max
-    // if (commands[0] == "max")
-    // {
-    //     max();
-    // }
-
-    // // avg
-    // if (commands[0] == "avg")
-    // {
-    //     avg();
-    // }
-
-    // // predict
-    // if (commands[0] == "predict")
-    // {
-    //     predict();
-    // }
-
-    // // time
-    // if (commands[0] == "time")
-    // {
-    //     time();
-    // }
-
-    // // step
-    // if (commands[0] == "step")
-    // {
-    //     step();
-    // }
-
-    // // import
-    // if (commands[0] == "import")
-    // {
-    //     import();
-    // }
+}
+Command::Command(std::string _cmd, std::string _arg1)
+    : cmd(_cmd), arg1(_arg1)
+{
+}
+Command::Command(std::string _cmd, std::string _arg1, OrderBookType _arg2, std::string _order)
+    : cmd(_cmd), arg1(_arg1), arg2(_arg2), order(_order)
+{
+}
+Command::Command(std::string _cmd, std::string _arg1, OrderBookType _arg2, std::string _order, std::string _arg3)
+    : cmd(_cmd), arg1(_arg1), arg2(_arg2), order(_order), arg3(_arg3)
+{
 }
 
 void Command::help()
@@ -106,7 +58,7 @@ void Command::helpCmd(std::string command)
     }
     if (command == "predict")
     {
-        std::cout << "predict <max/min> <product> <order>:    predict <max> or <min> and <order> for the sent <product> for the next time step" << std::endl;
+        std::cout << "predict <max/min> <order> <product>:    predict <max> or <min> and <order> for the sent <product> for the next time step" << std::endl;
         std::cout << "Example:" << std::endl;
         std::cout << "user$ predict max ETH/BTC bid" << std::endl;
         std::cout << "advisorbot$ The average ETH/BTC ask price over the last 10 timesteps was 1.0" << std::endl;
@@ -145,54 +97,26 @@ void Command::prod(OrderBook orderBook)
     std::cout << output << std::endl;
 }
 
-double Command::min(OrderBook orderBook, std::string arg1, std::string arg2, std::string timestep)
+double Command::min(OrderBook orderBook, std::string arg1, OrderBookType arg2, std::string timestep, std::string order)
 {
-    OrderBookType newArg2;
-    if (arg2 == "ask")
-    {
-        newArg2 = OrderBookType::ask;
-    }
-    if (arg2 == "bid")
-    {
-        newArg2 = OrderBookType::bid;
-    }
-    std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, newArg2, timestep);
+    std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, arg2, timestep);
 
     double min = orderBook.getLowPrice(entries);
-    std::cout << "The min " << arg2 << " for " << arg1 << " is " << min << std::endl;
+    std::cout << "The min " << order << " for " << arg1 << " is " << min << std::endl;
     return min;
 }
 
-double Command::max(OrderBook orderBook, std::string arg1, std::string arg2, std::string timestep)
+double Command::max(OrderBook orderBook, std::string arg1, OrderBookType arg2, std::string timestep, std::string order)
 {
-    OrderBookType newArg2;
-    if (arg2 == "ask")
-    {
-        newArg2 = OrderBookType::ask;
-    }
-    if (arg2 == "bid")
-    {
-        newArg2 = OrderBookType::bid;
-    }
-    std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, newArg2, timestep);
+    std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, arg2, timestep);
 
     double max = orderBook.getHighPrice(entries);
-    std::cout << "The max " << arg2 << " for " << arg1 << " is " << max << std::endl;
+    std::cout << "The max " << order << " for " << arg1 << " is " << max << std::endl;
     return max;
 }
 
-void Command::avg(OrderBook orderBook, std::string arg1, std::string arg2, std::string arg3, std::string timestep)
+void Command::avg(OrderBook orderBook, std::string arg1, OrderBookType arg2, std::string arg3, std::string timestep, std::string order)
 {
-    OrderBookType newArg2;
-    if (arg2 == "ask")
-    {
-        newArg2 = OrderBookType::ask;
-    }
-    if (arg2 == "bid")
-    {
-        newArg2 = OrderBookType::bid;
-    }
-
     std::vector<std::string> timestamps = orderBook.getKnownTimestamps();
     int ts_index;
     for (int i = 0; i < timestamps.size(); i++)
@@ -211,7 +135,7 @@ void Command::avg(OrderBook orderBook, std::string arg1, std::string arg2, std::
 
     for (int i = 0; i < newArg3; i++)
     {
-        std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, newArg2, newTimestep);
+        std::vector<OrderBookEntry> entries = orderBook.getOrders(arg1, arg2, newTimestep);
         for (OrderBookEntry &e : entries)
         {
             sum += e.price;
@@ -220,10 +144,10 @@ void Command::avg(OrderBook orderBook, std::string arg1, std::string arg2, std::
         newTimestep = orderBook.getNextTime(newTimestep);
     }
     double avg{sum / count};
-    std::cout << "The average " << arg1 << " " << arg2 << " price over the last " << arg3 << " timesteps was " << avg << std::endl;
+    std::cout << "The average " << arg1 << " " << order << " price over the last " << arg3 << " timesteps was " << avg << std::endl;
 }
 
-void Command::predict(OrderBook orderBook, std::string arg1, std::string arg2, std::string arg3, std::string timestep)
+void Command::predict(OrderBook orderBook, std::string arg1, OrderBookType arg2, std::string arg3, std::string timestep, std::string order)
 {
     // Simple Moving Average prediction
     // Predict min/max for specific product's ask/bid price
@@ -255,11 +179,11 @@ void Command::predict(OrderBook orderBook, std::string arg1, std::string arg2, s
     {
         if (arg1 == "min")
         {
-            m_values.push_back(min(orderBook, arg2, arg3, timestamps[i]));
+            m_values.push_back(min(orderBook, arg3, arg2, timestamps[i], order));
         }
         if (arg1 == "max")
         {
-            m_values.push_back(max(orderBook, arg2, arg3, timestamps[i]));
+            m_values.push_back(max(orderBook, arg3, arg2, timestamps[i], order));
         }
     }
 
@@ -327,7 +251,7 @@ void Command::predict(OrderBook orderBook, std::string arg1, std::string arg2, s
     }
     double thirtySMA = thirtyTotal / thirty_avgs.size();
 
-    std::cout << "The simple moving average (SMA) for the " << arg1 << " prices of " << arg2 << std::endl;
+    std::cout << "The simple moving average (SMA) for the " << arg1 << " prices of " << arg3 << std::endl;
     std::cout << "The 1 minute SMA is " << minuteSMA << std::endl;
     std::cout << "The 10 minute SMA is " << tenSMA << std::endl;
     std::cout << "The 30 minute SMA is " << thirtySMA << std::endl;

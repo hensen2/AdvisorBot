@@ -24,7 +24,7 @@ public:
 
     /** returns the earliest time in the orderbook */
     std::string getEarliestTime();
-    /** returns the earliest time in the orderbook */
+    /** returns the time thirty minutes into the orderbook */
     std::string getLaterTime();
     /** returns the next time after the sent time in the orderbook
      * If there is no next timestamp, wraps around to the start

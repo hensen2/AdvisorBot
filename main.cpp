@@ -1,4 +1,6 @@
 #include "AdvisorBot.h"
+#include "StringParser.h"
+#include <iostream>
 
 int main()
 {
