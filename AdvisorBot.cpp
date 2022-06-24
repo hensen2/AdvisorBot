@@ -3,6 +3,7 @@
 #include "Command.h"
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 // Tell compiler to create default constructor
 AdvisorBot::AdvisorBot() = default;
@@ -16,7 +17,7 @@ void AdvisorBot::init()
     while (true)
     {
         input = getUserOption();
-        handleUserOptions(input);
+        handleUserOptions(orderBook, currentTime, input);
     }
 }
 
@@ -108,12 +109,32 @@ std::vector<std::string> AdvisorBot::getUserOption()
         userOption = line;
         std::cout << "You entered: " << userOption << std::endl;
         std::vector<std::string> commands = StringParser::tokeniseCmds(userOption, ' ');
-        for (std::string &cmd : possibleCmds)
+
+        if (commands.size() < 1 || commands.size() > 4) // Incorrect input
         {
-            // if (cmd == commands[0])
-            // {
-            // }
-            // throw error
+            std::cout << "Bad input, incorrect number of arguments" << std::endl;
+            throw std::exception{};
+        }
+
+        if (std::find(possibleCmds.begin(), possibleCmds.end(), commands[0]) != possibleCmds.end())
+        {
+            for (int i = 1; i < commands.size(); i++)
+            {
+                if (std::find(possibleArgs.begin(), possibleArgs.end(), commands[i]) != possibleArgs.end())
+                {
+                    continue;
+                }
+                else
+                {
+                    std::cout << "Bad input, incorrect arguments given" << std::endl;
+                    throw std::exception{};
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Bad input, incorrect command given" << std::endl;
+            throw std::exception{};
         }
     }
     catch (const std::exception &e)
@@ -123,7 +144,7 @@ std::vector<std::string> AdvisorBot::getUserOption()
     return commands;
 }
 
-void AdvisorBot::handleUserOptions(std::vector<std::string> userOption)
+void AdvisorBot::handleUserOptions(OrderBook orderBook, std::string currentTime, std::vector<std::string> userOption)
 {
     std::string cmd{};
     std::string arg1{};
@@ -139,55 +160,7 @@ void AdvisorBot::handleUserOptions(std::vector<std::string> userOption)
         order = userOption[2];
         arg3 = userOption[3];
     }
-
-    Command command(cmd, arg1, arg2, order, arg3);
-
-    // if (userOption[0] == "help")
-    // {
-    //     if (userOption.size() > 1)
-    //     {
-    //         for (std::string command : possibleCmds)
-    //         {
-    //             if (userOption[1] == command)
-    //             {
-    //                 Command::helpCmd(command);
-    //                 return;
-    //             }
-    //         }
-    //     }
-    //     Command::help();
-    // }
-    // if (userOption[0] == "prod" && userOption.size() == 1)
-    // {
-    //     Command::prod(orderBook);
-    // }
-    // if (userOption[0] == "min" && userOption.size() == 3)
-    // {
-    //     Command::min(orderBook, userOption[1], userOption[2], currentTime);
-    // }
-    // if (userOption[0] == "max" && userOption.size() == 3)
-    // {
-    //     Command::max(orderBook, userOption[1], userOption[2], currentTime);
-    // }
-    // if (userOption[0] == "avg" && userOption.size() == 4)
-    // {
-    //     Command::avg(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
-    // }
-    // if (userOption[0] == "predict" && userOption.size() == 4)
-    // {
-    //     Command::predict(orderBook, userOption[1], userOption[2], userOption[3], currentTime);
-    // }
-    // if (userOption[0] == "time" && userOption.size() == 1)
-    // {
-    //     Command::time(currentTime);
-    // }
-    // if (userOption[0] == "step" && userOption.size() == 1)
-    // {
-    //     currentTime = Command::step(orderBook, currentTime);
-    // }
-    // if (userOption[0] == "import" && userOption.size() == 2)
-    // {
-    //     orderBook = Command::import(userOption[1]);
-    //     currentTime = orderBook.getEarliestTime();
-    // }
+    std::cout << cmd << std::endl;
+    Command command(orderBook, currentTime, cmd);
+    command.invoke();
 }

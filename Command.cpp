@@ -4,21 +4,100 @@
 #include "OrderBook.h"
 #include <iostream>
 
-Command::Command(std::string _cmd)
-    : cmd(_cmd)
+Command::Command(OrderBook _orderBook,
+                 std::string _currentTime,
+                 std::string _cmd)
+    : orderBook(_orderBook),
+      currentTime(_currentTime),
+      cmd(_cmd)
 {
 }
-Command::Command(std::string _cmd, std::string _arg1)
-    : cmd(_cmd), arg1(_arg1)
+Command::Command(OrderBook _orderBook,
+                 std::string _currentTime,
+                 std::string _cmd,
+                 std::string _arg1)
+    : orderBook(_orderBook),
+      currentTime(_currentTime),
+      cmd(_cmd),
+      arg1(_arg1)
 {
 }
-Command::Command(std::string _cmd, std::string _arg1, OrderBookType _arg2, std::string _order)
-    : cmd(_cmd), arg1(_arg1), arg2(_arg2), order(_order)
+Command::Command(OrderBook _orderBook,
+                 std::string _currentTime,
+                 std::string _cmd,
+                 std::string _arg1,
+                 OrderBookType _arg2,
+                 std::string _order)
+    : orderBook(_orderBook),
+      currentTime(_currentTime),
+      cmd(_cmd),
+      arg1(_arg1),
+      arg2(_arg2),
+      order(_order)
 {
 }
-Command::Command(std::string _cmd, std::string _arg1, OrderBookType _arg2, std::string _order, std::string _arg3)
-    : cmd(_cmd), arg1(_arg1), arg2(_arg2), order(_order), arg3(_arg3)
+Command::Command(OrderBook _orderBook,
+                 std::string _currentTime,
+                 std::string _cmd,
+                 std::string _arg1,
+                 OrderBookType _arg2,
+                 std::string _order,
+                 std::string _arg3)
+    : orderBook(_orderBook),
+      currentTime(_currentTime),
+      cmd(_cmd),
+      arg1(_arg1),
+      arg2(_arg2),
+      order(_order),
+      arg3(_arg3)
 {
+}
+
+void Command::invoke()
+{
+    if (cmd == "help")
+    {
+        if (!arg1.empty())
+        {
+            helpCmd(arg1);
+            return;
+        }
+        help();
+    }
+
+    if (cmd == "prod" && arg1.empty())
+    {
+        prod(orderBook);
+    }
+    if (cmd == "min" && !order.empty())
+    {
+        min(orderBook, arg1, arg2, currentTime, order);
+    }
+    if (cmd == "max" && !order.empty())
+    {
+        max(orderBook, arg1, arg2, currentTime, order);
+    }
+    if (cmd == "avg" && !arg3.empty())
+    {
+        avg(orderBook, arg1, arg2, arg3, currentTime, order);
+    }
+    if (cmd == "predict" && !arg3.empty())
+    {
+        predict(orderBook, arg1, arg2, arg3, currentTime, order);
+    }
+    if (cmd == "time" && arg1.empty())
+    {
+        time(currentTime);
+    }
+    if (cmd == "step" && arg1.empty())
+    {
+        currentTime = step(orderBook, currentTime);
+    }
+    if (cmd == "import" && !arg1.empty())
+    {
+        orderBook = import(arg1);
+        currentTime = orderBook.getEarliestTime();
+    }
 }
 
 void Command::help()

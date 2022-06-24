@@ -14,9 +14,9 @@ public:
 
 private:
     std::vector<std::string> getUserOption();
-    void handleUserOptions(std::vector<std::string> userOption);
+    void handleUserOptions(OrderBook orderBook, std::string currentTime, std::vector<std::string> input);
     std::vector<std::string> possibleCmds{"help", "prod", "min", "max", "avg", "predict", "time", "step", "import"};
-    std::vector<std::string> possibleArgs{"bid", "ask", "ETH/BTC", "DOGE/BTC", "BTC/USDT", "ETH/USDT", "DOGE/USDT"};
+    std::vector<std::string> possibleArgs{"bid", "ask", "ETH/BTC", "DOGE/BTC", "BTC/USDT", "ETH/USDT", "DOGE/USDT", "prod", "min", "max", "avg", "predict", "time", "step", "import"};
     std::string currentTime;
     OrderBook orderBook{"20200601.csv"};
 };
