@@ -103,12 +103,16 @@ std::vector<std::string> AdvisorBot::getUserOption()
               << "Please enter a valid command, or enter help to list all available commands" << std::endl;
 
     std::cout << "user$ ";
+
+    // Accept user input and test for correctness
     std::getline(std::cin, line);
     try
     {
         userOption = line;
-        std::cout << "You entered: " << userOption << std::endl;
-        std::vector<std::string> commands = StringParser::tokeniseCmds(userOption, ' ');
+        std::cout << "advisorbot$ You entered: " << userOption << std::endl;
+
+        // Call command parser and return vector of strings
+        commands = StringParser::tokeniseCmds(userOption, ' ');
 
         if (commands.size() < 1 || commands.size() > 4) // Incorrect input
         {
@@ -146,21 +150,40 @@ std::vector<std::string> AdvisorBot::getUserOption()
 
 void AdvisorBot::handleUserOptions(OrderBook orderBook, std::string currentTime, std::vector<std::string> userOption)
 {
-    std::string cmd{};
-    std::string arg1{};
-    OrderBookType arg2{};
-    std::string order{};
-    std::string arg3{};
-
-    for (std::string &str : userOption)
+    // Call different constructor methods based on size of input from user
+    if (userOption.size() == 1)
     {
-        cmd = userOption[0];
-        arg1 = userOption[1];
-        arg2 = OrderBookEntry::stringToOrderBookType(userOption[2]);
-        order = userOption[2];
-        arg3 = userOption[3];
+        std::string cmd = userOption[0];
+        Command command(orderBook, currentTime, cmd);
+        command.invoke();
     }
-    std::cout << cmd << std::endl;
-    Command command(orderBook, currentTime, cmd);
-    command.invoke();
+
+    if (userOption.size() == 2)
+    {
+        std::string cmd = userOption[0];
+        std::string arg1 = userOption[1];
+        Command command(orderBook, currentTime, cmd, arg1);
+        command.invoke();
+    }
+
+    if (userOption.size() == 3)
+    {
+        std::string cmd = userOption[0];
+        std::string arg1 = userOption[1];
+        std::string order = userOption[2];
+        OrderBookType arg2 = OrderBookEntry::stringToOrderBookType(userOption[2]);
+        Command command(orderBook, currentTime, cmd, arg1, arg2, order);
+        command.invoke();
+    }
+
+    if (userOption.size() == 4)
+    {
+        std::string cmd = userOption[0];
+        std::string arg1 = userOption[1];
+        std::string order = userOption[2];
+        OrderBookType arg2 = OrderBookEntry::stringToOrderBookType(userOption[2]);
+        std::string arg3 = userOption[3];
+        Command command(orderBook, currentTime, cmd, arg1, arg2, order, arg3);
+        command.invoke();
+    }
 }
